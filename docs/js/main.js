@@ -1,21 +1,22 @@
 $(function() {
   var $window = $(window);
-  var $stateSwitch = $('#state-switch');
   var sectionTop = $('.top').outerHeight() + 20;
+  var $createDestroy = $('#switch-create-destroy');
 
   // initialize highlight.js
   hljs.initHighlightingOnLoad();
 
   // navigation
-  $('a[href^="#"]').on('click', function(event) {
+  $('a[href*="#"]').on('click', function(event) {
     event.preventDefault();
-    var $target = $($(this).attr('href'));
+    var $target = $($(this).attr('href').slice('#'));
 
     if ($target.length) {
       $window.scrollTop($target.offset().top - sectionTop);
     }
   });
 
+  // download switch
   $('input[name="download-version"]').on({
     'init.bootstrapSwitch': function() {
       $('#download-' + ($(this).is(':checked') ? '2' : '3')).hide();
@@ -27,19 +28,44 @@ $(function() {
   });
 
   // initialize all the inputs
-  $('input[type="checkbox"],[type="radio"]').not('#create-switch').not('#events-switch').bootstrapSwitch();
+  $('input[type="checkbox"], input[type="radio"]:not("#switch-create-destroy, #switch-modal")').bootstrapSwitch();
 
-  // state
-  $('#state-switch-toggle').on('click', function () {
-    $stateSwitch.bootstrapSwitch('toggleState');
+  $('[data-switch-get]').on("click", function() {
+    var type = $(this).data('switch-get');
+
+    alert($('#switch-' + type).bootstrapSwitch(type));
   });
-  $('#state-switch-on').on('click', function () {
-    $stateSwitch.bootstrapSwitch('state', true);
+
+  $('[data-switch-set]').on('click', function() {
+    var type = $(this).data('switch-set');
+
+    $('#switch-' + type).bootstrapSwitch(type, $(this).data('switch-value'));
   });
-  $('#state-switch-off').on('click', function () {
-    $stateSwitch.bootstrapSwitch('state', false);
+
+  $('[data-switch-toggle]').on('click', function() {
+    var type = $(this).data('switch-toggle');
+
+    $('#switch-' + type).bootstrapSwitch('toggle' + type.charAt(0).toUpperCase() + type.slice(1));
   });
-  $('#state-switch-state').on('click', function () {
-    alert($stateSwitch.bootstrapSwitch('state'));
+
+  $('[data-switch-set-value]').on('input', function(event) {
+    event.preventDefault();
+    var type = $(this).data('switch-set-value');
+    var value = $.trim($(this).val());
+
+    if ($(this).data('value') == value) {
+      return;
+    }
+
+    $('#switch-' + type).bootstrapSwitch(type, value);
   });
+
+  $('[data-switch-create-destroy]').on('click', function() {
+    var isSwitch = $createDestroy.data('bootstrap-switch');
+
+    $createDestroy.bootstrapSwitch(isSwitch ? 'destroy' : null);
+    $(this).button(isSwitch ? 'reset' : 'destroy');
+  });
+
+  $('#modal-switch');
 });
